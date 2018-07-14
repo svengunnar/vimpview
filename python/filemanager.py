@@ -55,7 +55,7 @@ class FileManager:
 
         self.root = {"root" : ({}, [])}
         self.full_path = {}
-        files = subprocess.check_output(["git", "--git-dir", self.path, "ls-files", "-oc"])
+        files = subprocess.check_output(["git", "--git-dir", self.path, "ls-files", "-c"])
         files = files.splitlines()
 
         for f in files:
