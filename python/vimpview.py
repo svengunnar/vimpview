@@ -1,7 +1,6 @@
 from filemanager import FileManager
 import vim
 import os.path
-import copy
 
 def init():
     a = FileManager()

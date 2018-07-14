@@ -1,7 +1,21 @@
 import subprocess
 import os.path
+import re
 
 class FileManager:
+
+    def get_submodules(self, git_dir):
+        # Get the paths to the submodules
+        try:
+            subm = subprocess.check_output(["git", "--git-dir", git_dir, "config",
+                "--file", os.path.join(os.path.dirname(git_dir), ".gitmodules"), "--get-regexp",  "path"])
+        except:
+            return []
+
+        subm = re.compile("submodule.* ").split(subm)
+        subm.pop(0)
+        return map(lambda s: s.strip(), subm)
+
     def __add_rec(self, l, d, last_key):
         key = l.pop(0)
 
@@ -38,15 +52,30 @@ class FileManager:
         self.__gen_text_rec(self.root["root"], l, ""),
         return (l, self.full_path, self.path)
 
-    def __init__(self):
+    def setup_dir(self, rel_root_subm_dir = ""):
+        # Get files for root
+        cur_root_dir = os.path.join(os.path.dirname(self.path), rel_root_subm_dir)
+        files = subprocess.check_output(["git", "--git-dir", os.path.join(cur_root_dir, ".git"), "ls-files", "-c"])
+        files = files.splitlines()
 
+        subms = self.get_submodules(cur_root_dir)
+        for f in files:
+            if f in subms:
+                self.setup_dir(os.path.join(rel_root_subm_dir, f))
+            else:
+                # find absolute path to f
+                abs_path = os.path.join(cur_root_dir, f)
+                self.full_path[os.path.basename(f)] = abs_path
+                # Add the file to the dict
+                self.__add(os.path.join(rel_root_subm_dir, f))
+
+    def __init__(self):
         # Find .git file
         self.root = None
         self.path = os.getcwd()
-        git_file = ".git"
         while "/" != self.path:
-            if os.path.isdir(os.path.join(self.path, git_file)):
-                self.path = os.path.join(self.path, git_file)
+            if os.path.isdir(os.path.join(self.path, ".git")):
+                self.path = os.path.join(self.path, ".git")
                 break
             self.path = os.path.dirname(self.path)
 
@@ -55,10 +84,6 @@ class FileManager:
 
         self.root = {"root" : ({}, [])}
         self.full_path = {}
-        files = subprocess.check_output(["git", "--git-dir", self.path, "ls-files", "-c"])
-        files = files.splitlines()
 
-        for f in files:
-            self.full_path[os.path.basename(f)] = f
-            self.__add(f)
+        self.setup_dir()
 
