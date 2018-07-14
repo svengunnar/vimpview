@@ -2,6 +2,10 @@ from filemanager import FileManager
 import vim
 import os.path
 
+
+def goto_window(w):
+    vim.command("exe " + str(w.number) + " \"wincmd w\"")
+
 def init():
     vim.command('''
         function! OpenProjectView()
@@ -32,12 +36,22 @@ def init():
 
 def open_project_view():
     if "g:b_idx" in vim.vars:
-        # Check if the window is already opened in some window
-        # then we can just disregard this event.
         for w in vim.windows:
             if w.buffer.number == vim.vars["g:b_idx"]:
-                print("project view already opened")
+                if w.number != vim.current.window.number:
+                    old_buf = vim.current.window.buffer.number
+                    goto_window(w)
+                    vim.command("quit")
+                    # Go back to the previous window
+                    for w_old in vim.windows:
+                        if w_old.buffer.number == old_buf:
+                            vim.command("exe " + str(w_old.number) + " \"wincmd w\"")
+                else:
+                    goto_window(w)
+                    vim.command("quit")
+
                 return
+
 
         vim.command("vert sb" + str(vim.vars["g:b_idx"]))
         vim.current.window.width = vim.vars["g:window_width"]
@@ -102,6 +116,7 @@ def open_file():
         else:
             win = vim.current.window
             vim.command("vsp " + os.path.join(vim.vars["g:path"], d[f]))
+            # swap windows
             vim.command("execute \"normal! \<C-W>r\"")
             win.width = vim.vars["g:window_width"]
     except vim.error:
