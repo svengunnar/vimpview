@@ -3,21 +3,6 @@ import vim
 import os.path
 
 def init():
-    a = FileManager()
-    text, full_path, git_path = a.get_result()
-    if text == None:
-        vim.command('''
-            function! Run()
-              python print("Found no .git dir!")
-            endfunction
-                ''')
-        vim.command("nnoremap <leader>o :call Run()<CR>")
-        return
-
-    vim.vars["g:text"] = text
-    vim.vars["g:full_path"] = full_path
-    vim.vars["g:path"] = os.path.dirname(git_path)
-
     vim.command('''
         function! OpenProjectView()
           python open_project_view()
@@ -36,6 +21,12 @@ def init():
         endfunction
             ''')
 
+    vim.command('''
+        function! WinEnter()
+          python win_enter()
+        endfunction
+            ''')
+
     vim.command("autocmd QuitPre * :call PreQuit()")
     vim.command("nnoremap <leader>o :call OpenProjectView()<CR>")
 
@@ -50,9 +41,22 @@ def open_project_view():
 
         vim.command("vert sb" + str(vim.vars["g:b_idx"]))
         vim.current.window.width = vim.vars["g:window_width"]
+        vim.command("set winfixwidth")
     else:
+        t, full_path, git_path = FileManager().get_result()
+        if t == None:
+            vim.command('''
+                function! Run()
+                  python print("Found no .git dir!")
+                endfunction
+                    ''')
+            vim.command("nnoremap <leader>o :call Run()<CR>")
+            return
+
+        vim.vars["g:full_path"] = full_path
+        vim.vars["g:path"] = os.path.dirname(git_path)
+
         vim.command("vnew")
-        t = vim.vars["g:text"]
 
         if t:
             vim.current.buffer[0] = t[0]
@@ -65,6 +69,7 @@ def open_project_view():
 
         max_len += 1
         vim.current.window.width = max_len
+        vim.command("set winfixwidth")
         vim.vars["g:window_width"] = max_len
 
         vim.command("setlocal ro")
@@ -98,7 +103,7 @@ def open_file():
             win = vim.current.window
             vim.command("vsp " + os.path.join(vim.vars["g:path"], d[f]))
             vim.command("execute \"normal! \<C-W>r\"")
-            win.width = 40
+            win.width = vim.vars["g:window_width"]
     except vim.error:
         return
 
