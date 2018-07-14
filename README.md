@@ -1,5 +1,5 @@
 # vimpview
-vim plugin for browsing files. The plugin tries to find the .git directory to identify a project.
+vim plugin for browsing files. The plugin tries to find the .git directory to identify a project. It also works with git submodules.
 
 `<leader>o` open the window for browsing files
 
