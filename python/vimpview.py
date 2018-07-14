@@ -50,16 +50,23 @@ def open_project_view():
                 return
 
         vim.command("vert sb" + str(vim.vars["g:b_idx"]))
-        vim.current.window.width = 40
+        vim.current.window.width = vim.vars["g:window_width"]
     else:
         vim.command("vnew")
-        vim.current.window.width = 40
         t = vim.vars["g:text"]
+
         if t:
             vim.current.buffer[0] = t[0]
+            max_len = len(t[0])
 
         for f in t[1:]:
             vim.current.buffer.append(f)
+            if max_len < len(f):
+                max_len = len(f)
+
+        max_len += 1
+        vim.current.window.width = max_len
+        vim.vars["g:window_width"] = max_len
 
         vim.command("setlocal ro")
         vim.command("setlocal hidden")
