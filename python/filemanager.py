@@ -8,7 +8,8 @@ class FileManager:
         # Get the paths to the submodules
         try:
             subm = subprocess.check_output(["git", "--git-dir", git_dir, "config",
-                "--file", os.path.join(os.path.dirname(git_dir), ".gitmodules"), "--get-regexp",  "path"])
+                "--file", os.path.join(os.path.dirname(git_dir), ".gitmodules"), "--get-regexp",
+                "path"]).decode("utf8")
         except:
             return []
 
@@ -55,7 +56,8 @@ class FileManager:
     def setup_dir(self, rel_root_subm_dir = ""):
         # Get files for root
         cur_root_dir = os.path.join(os.path.dirname(self.path), rel_root_subm_dir)
-        files = subprocess.check_output(["git", "--git-dir", os.path.join(cur_root_dir, ".git"), "ls-files", "-c"])
+        files = subprocess.check_output(["git", "--git-dir", os.path.join(cur_root_dir, ".git"), "ls-files",
+            "-c"]).decode("utf-8")
         files = files.splitlines()
 
         subms = self.get_submodules(cur_root_dir)
@@ -74,7 +76,7 @@ class FileManager:
         self.root = None
         self.path = os.getcwd()
         while "/" != self.path:
-            if os.path.isdir(os.path.join(self.path, ".git")):
+            if os.path.exists(os.path.join(self.path, ".git")):
                 self.path = os.path.join(self.path, ".git")
                 break
             self.path = os.path.dirname(self.path)
