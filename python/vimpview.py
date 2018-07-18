@@ -1,7 +1,6 @@
-from filemanager import FileManager
+from filemanager import get_pview
 import vim
 import os.path
-
 
 def goto_window(w):
     vim.command("exe " + str(w.number) + " \"wincmd w\"")
@@ -9,25 +8,25 @@ def goto_window(w):
 def init():
     vim.command('''
         function! OpenProjectView()
-          python open_project_view()
+          pyx open_project_view()
         endfunction
             ''')
 
     vim.command('''
         function! OpenFile()
-          python open_file()
+          pyx open_file()
         endfunction
             ''')
 
     vim.command('''
         function! PreQuit()
-          python pre_quit()
+          pyx pre_quit()
         endfunction
             ''')
 
     vim.command('''
         function! WinEnter()
-          python win_enter()
+          pyx win_enter()
         endfunction
             ''')
 
@@ -52,11 +51,11 @@ def open_project_view():
 
                 return
 
-
         vim.command("b " + str(vim.vars["g:b_idx"]))
     else:
-        t, full_path, git_path = FileManager().get_result()
-        if t == None:
+        t = []
+        root = get_pview(t)
+        if t == []:
             vim.command('''
                 function! Run()
                   python print("Found no .git dir!")
@@ -65,8 +64,9 @@ def open_project_view():
             vim.command("nnoremap <leader>o :call Run()<CR>")
             return
 
-        vim.vars["g:full_path"] = full_path
-        vim.vars["g:path"] = os.path.dirname(git_path)
+        vim.vars["g:path"] = root
+        # Create a new hidden buffer in the current window
+        vim.command("ene")
 
         if t:
             vim.current.buffer[0] = t[0]
@@ -91,13 +91,36 @@ def open_project_view():
         vim.vars["g:b_idx"] = vim.current.buffer.number
 
 def open_file():
-    f = vim.current.line.decode("utf-8").strip()
-    d = vim.vars["g:full_path"]
-
-    if f not in d:
+    # Don't open directories
+    if "/" in vim.current.line:
         return
 
-    vim.command("e " + os.path.join(vim.vars["g:path"], d[f].decode("utf-8")))
+    # Find the absolute path of the file under the cursor
+    z = 0
+    row, _ = vim.current.window.cursor
+    f = vim.current.buffer[row - z - 1]
+    f_path = f.strip()
+    i = len(f) - len(f.lstrip(' '))
+    prev_i = i
+
+    while True:
+
+        if prev_i > i and "/" in f:
+            f_path = os.path.join(f.strip(), f_path)
+            prev_i = i
+
+        if i == 0:
+            break
+
+        f = vim.current.buffer[row - z - 1]
+        i = len(f) - len(f.lstrip(' '))
+        z += 1
+
+    # Open the file
+    try:
+        vim.command("e " + os.path.join(vim.vars["g:path"].decode("utf-8"), f_path))
+    except vim.error:
+        return
 
 def pre_quit():
     # clear the text in the buffer to avoid error msg
