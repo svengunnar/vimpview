@@ -2,6 +2,28 @@ from filemanager import get_pview
 import vim
 import os.path
 
+class BufWrapper:
+    def __init__(self, out):
+        self.out = out
+        self.first_append = True
+
+    def append(self, value):
+        self.out.append(value)
+        if self.first_append:
+            self.out[0] = value
+            self.first_append = False
+        else:
+            self.out.append(value)
+
+    def __getitem__(self, key):
+        return self.out[key]
+
+    def __setitem__(self, key, value):
+        self.out[key] = value
+
+    def empty(self):
+        return self.first_append == True
+
 def goto_window(w):
     vim.command("exe " + str(w.number) + " \"wincmd w\"")
 
@@ -53,26 +75,16 @@ def open_project_view():
 
         vim.command("b " + str(vim.vars["g:b_idx"]))
     else:
-        t = []
+        vim.command("ene")
+
+        t = BufWrapper(vim.current.buffer)
         root = get_pview(t)
-        if t == []:
-            vim.command('''
-                function! Run()
-                  python print("Found no .git dir!")
-                endfunction
-                    ''')
-            vim.command("nnoremap <leader>o :call Run()<CR>")
+        if t.empty():
+            print("Found no .git dir!\n")
             return
 
         vim.vars["g:path"] = root
         # Create a new hidden buffer in the current window
-        vim.command("ene")
-
-        if t:
-            vim.current.buffer[0] = t[0]
-
-        for f in t[1:]:
-            vim.current.buffer.append(f)
 
         vim.command("setlocal ro")
         vim.command("setlocal hidden")
