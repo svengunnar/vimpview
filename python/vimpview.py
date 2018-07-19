@@ -8,7 +8,6 @@ class BufWrapper:
         self.first_append = True
 
     def append(self, value):
-        self.out.append(value)
         if self.first_append:
             self.out[0] = value
             self.first_append = False

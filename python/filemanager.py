@@ -42,12 +42,12 @@ def get_submodules(root):
 
     subm = re.compile("submodule.* ").split(subm)
     subm.pop(0)
-    return map(lambda s: s.strip(), subm)
+    return lis(map(lambda s: s.strip(), subm))
 
 
 def process_root(root, rel_path, l_prev, out):
     files = subprocess.check_output(["git", "--git-dir", os.path.join(root, ".git"), "ls-files",
-        "-c"]).decode("utf-8")
+        "-c", "--full-name"]).decode("utf-8")
     files = files.splitlines()
     subms = get_submodules(root)
 
