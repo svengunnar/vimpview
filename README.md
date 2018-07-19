@@ -9,5 +9,5 @@ vim plugin for browsing files. The plugin tries to find the .git directory to id
 `git clone git@github.com:svengunnar/vimpview.git ~/.vim/bundle/vimpview`
 
 # Requirements
-* Git
+* git
 * vim 8.x
