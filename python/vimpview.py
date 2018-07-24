@@ -77,7 +77,10 @@ def open_project_view():
         vim.command("ene")
 
         t = BufWrapper(vim.current.buffer)
-        root = get_pview(t)
+
+        regex = vim.bindeval("g:vimpview_file_filter")
+
+        root = get_pview(t, regex)
         if t.empty():
             print("Found no .git dir!\n")
             return

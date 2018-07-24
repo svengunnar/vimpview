@@ -1,5 +1,9 @@
 let s:plugin_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 
+if !exists("g:vimpview_file_filter")
+    let g:vimpview_file_filter = []
+endif
+
 pyx << EOF
 import sys
 from os.path import normpath, join
