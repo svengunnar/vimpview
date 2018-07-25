@@ -42,36 +42,32 @@ def get_submodules(root):
 
     subm = re.compile("submodule.* ").split(subm)
     subm.pop(0)
-    return lis(map(lambda s: s.strip(), subm))
+    return list(map(lambda s: s.strip(), subm))
 
 
-def process_root(root, rel_path, l_prev, out, file_filter):
+def process_root(root, rel_path, l_prev, out, regex):
     files = subprocess.check_output(["git", "--git-dir", os.path.join(root, ".git"), "ls-files",
         "-c", "--full-name"]).decode("utf-8")
     files = files.splitlines()
     subms = get_submodules(root)
 
     for f in files:
-        found = False
-        if file_filter:
-            for r in file_filter:
-                m = re.compile(r)
-                if m.match(f):
-                    found = True
-                    break
 
-            if not found:
+        if regex:
+            m = re.compile(regex)
+            full_path = os.path.join(rel_path, f)
+            if not m.match(full_path):
                 continue
 
         if f in subms:
             new_root = os.path.join(root, f)
-            l_prev = process_root(new_root, os.path.join(rel_path, f), l_prev, out)
+            l_prev = process_root(new_root, os.path.join(rel_path, f), l_prev, out, regex)
         else:
             l_prev = get_text(os.path.join(rel_path, f), l_prev, out)
 
     return l_prev
 
-def get_pview(out, file_filter):
+def get_pview(out, regex):
     # Find .git file
     root = os.getcwd()
     while "/" != root:
@@ -82,8 +78,10 @@ def get_pview(out, file_filter):
     if root == "/":
         return None, None
 
+    os.chdir(root)
+
     l_prev = []
-    process_root(root, "", l_prev, out, file_filter)
+    process_root(root, "", l_prev, out, regex)
 
     return root
 

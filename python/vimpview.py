@@ -78,7 +78,7 @@ def open_project_view():
 
         t = BufWrapper(vim.current.buffer)
 
-        regex = vim.bindeval("g:vimpview_file_filter")
+        regex = vim.bindeval("g:vimpview_filter")
 
         root = get_pview(t, regex)
         if t.empty():

@@ -1,7 +1,7 @@
 let s:plugin_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 
-if !exists("g:vimpview_file_filter")
-    let g:vimpview_file_filter = []
+if !exists("g:vimpview_filter")
+    let g:vimpview_filter = ''
 endif
 
 pyx << EOF
