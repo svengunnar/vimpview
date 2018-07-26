@@ -5,7 +5,7 @@ vim plugin for browsing files. The plugin tries to find the .git directory to id
 
 `<CR>` open selected file
 
-`let g:vimpview_regex = '.*\.(py|vim)$'` in .vimrc will make the plugin only show .vim and .py files.
+`let g:vimpview_filter = '.*\.(py|vim)$'` in .vimrc will make the plugin only show .vim and .py files.
 
 # Pathogen
 `git clone git@github.com:svengunnar/vimpview.git ~/.vim/bundle/vimpview`
