@@ -67,18 +67,39 @@ def process_root(root, rel_path, l_prev, out, regex):
 
     return l_prev
 
+def is_in_working_tree(print_error=False):
+    try:
+        out = subprocess.check_output(["git", "rev-parse", "--is-inside-work-tree"],
+              stderr=subprocess.STDOUT).decode("utf-8")
+        if "true" in out:
+            return True
+        else:
+            return False
+    except subprocess.CalledProcessError as e:
+        if print_error:
+            print(e.output)
+        return False
+
 def get_pview(out, regex):
     root = os.getcwd()
 
     orig_root = root
 
-    while "/" != root:
-        if os.path.exists(os.path.join(root, ".git")):
-            break
-        root = os.path.dirname(root)
-
-    if root == "/":
+    if not is_in_working_tree(True):
         return None, None
+
+    while is_in_working_tree():
+        try:
+            root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"],
+                   stderr=subprocess.STDOUT).decode("utf-8")
+        except subprocess.CalledProcessError as e:
+            print(e.output)
+            return None, None
+
+        root = root.strip("\n")
+
+        os.chdir(root)
+        os.chdir("..")
 
     os.chdir(root)
 

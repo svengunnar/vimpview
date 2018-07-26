@@ -82,7 +82,6 @@ def open_project_view():
 
         root = get_pview(t, regex)
         if t.empty():
-            print("Found no .git dir, or all files where filtered away.\n")
             return
 
         vim.vars["g:root_path"] = root
