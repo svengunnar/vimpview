@@ -82,10 +82,10 @@ def open_project_view():
 
         root = get_pview(t, regex)
         if t.empty():
-            print("Found no .git dir!\n")
+            print("Found no .git dir, or all files where filtered away.\n")
             return
 
-        vim.vars["g:path"] = root
+        vim.vars["g:root_path"] = root
         # Create a new hidden buffer in the current window
 
         vim.command("setlocal ro")
@@ -132,7 +132,7 @@ def open_file():
 
     # Open the file
     try:
-        vim.command("e " + os.path.join(vim.vars["g:path"].decode("utf-8"), f_path))
+        vim.command("e " + os.path.join(vim.vars["g:root_path"].decode("utf-8"), f_path))
     except vim.error:
         return
 

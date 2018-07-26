@@ -53,7 +53,7 @@ def process_root(root, rel_path, l_prev, out, regex):
 
     for f in files:
 
-        if regex:
+        if regex and f not in subms:
             m = re.compile(regex)
             full_path = os.path.join(rel_path, f)
             if not m.match(full_path):
@@ -68,8 +68,10 @@ def process_root(root, rel_path, l_prev, out, regex):
     return l_prev
 
 def get_pview(out, regex):
-    # Find .git file
     root = os.getcwd()
+
+    orig_root = root
+
     while "/" != root:
         if os.path.exists(os.path.join(root, ".git")):
             break
@@ -83,6 +85,7 @@ def get_pview(out, regex):
     l_prev = []
     process_root(root, "", l_prev, out, regex)
 
-    return root
+    os.chdir(orig_root)
 
+    return root
 
