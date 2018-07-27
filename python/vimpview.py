@@ -78,7 +78,7 @@ def open_project_view():
 
         t = BufWrapper(vim.current.buffer)
 
-        regex = vim.bindeval("g:vimpview_filter")
+        regex = vim.bindeval("g:vimpview_filter").decode("utf-8")
 
         root = get_pview(t, regex)
         if t.empty():
