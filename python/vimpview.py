@@ -138,7 +138,7 @@ def open_file():
             break
 
         f = vim.current.buffer[row - z - 1]
-        i = len(f) - len(f.lstrip(' '))
+        i = n_lead_white_spaces(f)
         z += 1
 
     # Open the file
