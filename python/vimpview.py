@@ -26,6 +26,9 @@ class BufWrapper:
 def goto_window(w):
     vim.command("exe " + str(w.number) + " \"wincmd w\"")
 
+def hi_dirs():
+    vim.command("let a=matchadd('dirs','\w*\/')")
+
 def n_lead_white_spaces(s):
     return len(s) - len(s.lstrip())
 
@@ -45,12 +48,6 @@ def init():
     vim.command('''
         function! PreQuit()
           pyx pre_quit()
-        endfunction
-            ''')
-
-    vim.command('''
-        function! WinEnter()
-          pyx win_enter()
         endfunction
             ''')
 
@@ -89,7 +86,6 @@ def open_project_view():
 
         vim.vars["g:root_path"] = root
         # Create a new hidden buffer in the current window
-
         vim.command("setlocal ro")
         vim.command("setlocal hidden")
         vim.command("setlocal nomodifiable")
@@ -114,6 +110,25 @@ def open_project_view():
                 ''')
 
         vim.command("autocmd CursorMoved <buffer="+str(vim.current.buffer.number)+"> :call CursorMoved()")
+
+        # Initial highlight
+        vim.command("highlight dirs ctermfg=blue guifg=blue")
+        hi_dirs()
+
+        vim.command('''
+            function! BufWinEnter()
+              pyx buf_win_enter()
+            endfunction
+                ''')
+
+        vim.command('''
+            function! BufWinLeave()
+              pyx buf_win_leave()
+            endfunction
+                ''')
+
+        vim.command("autocmd BufWinLeave <buffer="+str(vim.current.buffer.number)+"> :call BufWinLeave()")
+        vim.command("autocmd BufWinEnter <buffer="+str(vim.current.buffer.number)+"> :call BufWinEnter()")
 
 def open_file():
     # Don't open directories
@@ -161,4 +176,10 @@ def cursor_moved():
     row, _ = vim.current.window.cursor
     f = vim.current.buffer[row - 1]
     vim.current.window.cursor = (row, n_lead_white_spaces(f))
+
+def buf_win_leave():
+    vim.command("execute clearmatches()")
+
+def buf_win_enter():
+    hi_dirs()
 
