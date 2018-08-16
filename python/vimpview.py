@@ -26,6 +26,9 @@ class BufWrapper:
 def goto_window(w):
     vim.command("exe " + str(w.number) + " \"wincmd w\"")
 
+def n_lead_white_spaces(s):
+    return len(s) - len(s.lstrip())
+
 def init():
     vim.command('''
         function! OpenProjectView()
@@ -122,7 +125,7 @@ def open_file():
     row, _ = vim.current.window.cursor
     f = vim.current.buffer[row - z - 1]
     f_path = f.strip()
-    i = len(f) - len(f.lstrip(' '))
+    i = n_lead_white_spaces(f)
     prev_i = i
 
     while True:
@@ -140,7 +143,8 @@ def open_file():
 
     # Open the file
     try:
-        vim.command("e " + os.path.join(vim.vars["g:root_path"].decode("utf-8"), f_path))
+        full_path = os.path.join(vim.vars["g:root_path"].decode("utf-8"), f_path)
+        vim.command("e " + os.path.relpath(full_path))
     except vim.error:
         return
 
@@ -156,6 +160,5 @@ def cursor_moved():
     # Move the cursor to point to the first character of the line
     row, _ = vim.current.window.cursor
     f = vim.current.buffer[row - 1]
-    lead_spaces = len(f) - len(f.lstrip())
-    vim.current.window.cursor = (row, lead_spaces)
+    vim.current.window.cursor = (row, n_lead_white_spaces(f))
 
