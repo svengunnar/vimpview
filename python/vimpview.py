@@ -26,9 +26,6 @@ class BufWrapper:
 def goto_window(w):
     vim.command("exe " + str(w.number) + " \"wincmd w\"")
 
-def hi_dirs():
-    vim.command("let a=matchadd('dirs','\w*\/')")
-
 def n_lead_white_spaces(s):
     return len(s) - len(s.lstrip())
 
@@ -111,16 +108,6 @@ def open_project_view():
 
         vim.command("autocmd CursorMoved <buffer="+str(vim.current.buffer.number)+"> :call CursorMoved()")
 
-        # Initial highlight
-        vim.command("highlight dirs ctermfg=blue guifg=blue")
-        hi_dirs()
-
-        vim.command('''
-            function! BufWinEnter()
-              pyx buf_win_enter()
-            endfunction
-                ''')
-
         vim.command('''
             function! BufWinLeave()
               pyx buf_win_leave()
@@ -128,7 +115,6 @@ def open_project_view():
                 ''')
 
         vim.command("autocmd BufWinLeave <buffer="+str(vim.current.buffer.number)+"> :call BufWinLeave()")
-        vim.command("autocmd BufWinEnter <buffer="+str(vim.current.buffer.number)+"> :call BufWinEnter()")
 
 def open_file():
     # Don't open directories
@@ -179,7 +165,4 @@ def cursor_moved():
 
 def buf_win_leave():
     vim.command("execute clearmatches()")
-
-def buf_win_enter():
-    hi_dirs()
 
