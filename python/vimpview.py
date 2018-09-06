@@ -99,23 +99,6 @@ def open_project_view():
 
         vim.vars["g:b_idx"] = vim.current.buffer.number
 
-        # Cursor in the project view
-        vim.command('''
-            function! CursorMoved()
-              pyx cursor_moved()
-            endfunction
-                ''')
-
-        vim.command("autocmd CursorMoved <buffer="+str(vim.current.buffer.number)+"> :call CursorMoved()")
-
-        vim.command('''
-            function! BufWinLeave()
-              pyx buf_win_leave()
-            endfunction
-                ''')
-
-        vim.command("autocmd BufWinLeave <buffer="+str(vim.current.buffer.number)+"> :call BufWinLeave()")
-
 def open_file():
     # Don't open directories
     if "/" in vim.current.line:
@@ -156,13 +139,4 @@ def pre_quit():
             idx = vim.vars["g:b_idx"]
             vim.command("bdelete! " + str(idx))
             del vim.vars["g:b_idx"]
-
-def cursor_moved():
-    # Move the cursor to point to the first character of the line
-    row, _ = vim.current.window.cursor
-    f = vim.current.buffer[row - 1]
-    vim.current.window.cursor = (row, n_lead_white_spaces(f))
-
-def buf_win_leave():
-    vim.command("execute clearmatches()")
 
