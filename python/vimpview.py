@@ -2,6 +2,8 @@ from filemanager import get_pview
 import vim
 import os.path
 
+import json
+
 class BufWrapper:
     def __init__(self, out):
         self.out = out
@@ -73,9 +75,10 @@ def open_project_view():
 
         t = BufWrapper(vim.current.buffer)
 
-        regex = vim.bindeval("g:vimpview_filter").decode("utf-8")
+        projects = vim.bindeval("g:vimpview_projects").decode("utf-8")
+        projects = json.loads(projects)
 
-        root = get_pview(t, regex)
+        root = get_pview(t, projects[0][1])
         if t.empty():
             return
 
