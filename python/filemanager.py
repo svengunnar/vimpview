@@ -2,6 +2,7 @@ import subprocess
 import os.path
 import re
 
+
 ind_per_lvl = "  "
 
 def get_text(f, l_prev, out):

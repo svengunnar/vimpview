@@ -49,12 +49,14 @@ def init():
             ''')
 
     vim.command("autocmd QuitPre * :call PreQuit()")
-    vim.command("nnoremap <leader>o :call OpenProjectView()<CR>")
+
+    proj_view_cmd = vim.bindeval("g:vimpview_open_project_view").decode("utf-8")
+    vim.command("nnoremap " + proj_view_cmd + " :call OpenProjectView()<CR>")
 
 def open_project_view():
-    if "g:b_idx" in vim.vars:
+    if "g:vimpview_idx" in vim.vars:
         for w in vim.windows:
-            if w.buffer.number == vim.vars["g:b_idx"]:
+            if w.buffer.number == vim.vars["g:vimpview_idx"]:
                 if w.number != vim.current.window.number:
                     old_buf = vim.current.window.buffer.number
                     goto_window(w)
@@ -63,13 +65,9 @@ def open_project_view():
                     for w_old in vim.windows:
                         if w_old.buffer.number == old_buf:
                             goto_window(w_old)
-                else:
-                    goto_window(w)
-                    vim.command("quit")
-
                 return
 
-        vim.command("b " + str(vim.vars["g:b_idx"]))
+        vim.command("b " + str(vim.vars["g:vimpview_idx"]))
     else:
         vim.command("ene")
 
@@ -81,7 +79,7 @@ def open_project_view():
         if t.empty():
             return
 
-        vim.vars["g:root_path"] = root
+        vim.vars["g:vimpview_root_path"] = root
         # Create a new hidden buffer in the current window
         vim.command("setlocal ro")
         vim.command("setlocal hidden")
@@ -90,14 +88,13 @@ def open_project_view():
 
         # highlight current line
         vim.command("setlocal cursorline")
-        vim.command("color desert")
         vim.command("setlocal cursorline")
         vim.command("hi CursorLine term=bold cterm=bold guibg=Grey40")
 
         # Map current buffer <CR> to open file
         vim.command("nnoremap <buffer> <CR> :call OpenFile()<CR>")
 
-        vim.vars["g:b_idx"] = vim.current.buffer.number
+        vim.vars["g:vimpview_idx"] = vim.current.buffer.number
 
 def open_file():
     # Don't open directories
@@ -127,7 +124,7 @@ def open_file():
 
     # Open the file
     try:
-        full_path = os.path.join(vim.vars["g:root_path"].decode("utf-8"), f_path)
+        full_path = os.path.join(vim.vars["g:vimpview_root_path"].decode("utf-8"), f_path)
         vim.command("e " + os.path.relpath(full_path))
     except vim.error:
         return
@@ -135,8 +132,8 @@ def open_file():
 def pre_quit():
     # clear the text in the buffer to avoid error msg
     if len(vim.windows) == 1:
-        if "g:b_idx" in vim.vars:
-            idx = vim.vars["g:b_idx"]
+        if "g:vimpview_idx" in vim.vars:
+            idx = vim.vars["g:vimpview_idx"]
             vim.command("bdelete! " + str(idx))
-            del vim.vars["g:b_idx"]
+            del vim.vars["g:vimpview_idx"]
 
