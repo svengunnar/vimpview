@@ -32,5 +32,5 @@ def get_files(pr_l, out):
             return proj_dir
 
     regex = re.compile(".*")
-    get_files_rec(out, regex)
+    get_files_priv(out, regex)
     return root_abs_path
