@@ -72,25 +72,23 @@ def init():
         endfunction
             ''')
 
+    vim.command('''
+        function! CursorMoved()
+          pyx cursor_moved()
+        endfunction
+            ''')
+
     vim.command("autocmd QuitPre * :call PreQuit()")
 
     proj_view_cmd = vim.bindeval("g:vimpview_open_project_view").decode("utf-8")
     vim.command("nnoremap " + proj_view_cmd + " :call OpenProjectView()<CR>")
 
+
+def cursor_moved():
+    print(get_cursor_abs_path())
+
 def open_project_view():
     if "g:vimpview_idx" in vim.vars:
-        for w in vim.windows:
-            if w.buffer.number == vim.vars["g:vimpview_idx"]:
-                if w.number != vim.current.window.number:
-                    old_buf = vim.current.window.buffer.number
-                    goto_window(w)
-                    vim.command("quit")
-                    # Go back to the previous window
-                    for w_old in vim.windows:
-                        if w_old.buffer.number == old_buf:
-                            goto_window(w_old)
-                return
-
         vim.command("b " + str(vim.vars["g:vimpview_idx"]))
     else:
         vim.command("ene")
@@ -120,7 +118,7 @@ def open_project_view():
         vim.command("nnoremap <buffer> <CR> :call OpenFile()<CR>")
 
         vim.vars["g:vimpview_idx"] = vim.current.buffer.number
-        vim.command("echo \"{}\"".format(get_cursor_abs_path()))
+        vim.command("autocmd CursorMoved <buffer> : call CursorMoved()")
 
 
 def open_file():
