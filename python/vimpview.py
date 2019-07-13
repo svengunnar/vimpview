@@ -1,7 +1,6 @@
 from getfiles import get_files
 import vim
 import os.path
-
 import json
 
 class BufWrapper:
@@ -30,6 +29,29 @@ def goto_window(w):
 
 def n_lead_white_spaces(s):
     return len(s) - len(s.lstrip())
+
+def get_cursor_abs_path():
+    # Find the absolute path of the file under the cursor
+    z = 0
+    row, _ = vim.current.window.cursor
+    f = vim.current.buffer[row - z - 1]
+    f_path = f.strip()
+    i = n_lead_white_spaces(f)
+    prev_i = i
+
+    while True:
+
+        if prev_i > i and "/" in f:
+            f_path = os.path.join(f.strip(), f_path)
+            prev_i = i
+
+        if i == 0:
+            break
+
+        f = vim.current.buffer[row - z - 1]
+        i = n_lead_white_spaces(f)
+        z += 1
+    return f_path
 
 def init():
     vim.command('''
@@ -98,32 +120,15 @@ def open_project_view():
         vim.command("nnoremap <buffer> <CR> :call OpenFile()<CR>")
 
         vim.vars["g:vimpview_idx"] = vim.current.buffer.number
+        vim.command("echo \"{}\"".format(get_cursor_abs_path()))
+
 
 def open_file():
     # Don't open directories
     if "/" in vim.current.line:
         return
 
-    # Find the absolute path of the file under the cursor
-    z = 0
-    row, _ = vim.current.window.cursor
-    f = vim.current.buffer[row - z - 1]
-    f_path = f.strip()
-    i = n_lead_white_spaces(f)
-    prev_i = i
-
-    while True:
-
-        if prev_i > i and "/" in f:
-            f_path = os.path.join(f.strip(), f_path)
-            prev_i = i
-
-        if i == 0:
-            break
-
-        f = vim.current.buffer[row - z - 1]
-        i = n_lead_white_spaces(f)
-        z += 1
+    f_path = get_cursor_abs_path()
 
     # Open the file
     try:
