@@ -1,4 +1,4 @@
-from filemanager import get_pview
+from getfiles import get_files
 import vim
 import os.path
 
@@ -78,7 +78,7 @@ def open_project_view():
         projects = vim.bindeval("g:vimpview_projects").decode("utf-8")
         projects = json.loads(projects)
 
-        root = get_pview(t, projects[0][1])
+        root = get_files(projects, t)
         if t.empty():
             return
 
