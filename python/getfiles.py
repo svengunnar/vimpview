@@ -22,7 +22,7 @@ def get_files(pr_l, out):
             get_files_rec(out, regex)
             os.chdir(root_abs_path)
             return proj_dir
-    
+
     regex = re.compile(".*")
     get_files_rec(out, regex)
     return root_abs_path
