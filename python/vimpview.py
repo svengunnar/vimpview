@@ -24,9 +24,6 @@ class BufWrapper:
     def empty(self):
         return self.first_append == True
 
-def goto_window(w):
-    vim.command("exe " + str(w.number) + " \"wincmd w\"")
-
 def n_lead_white_spaces(s):
     return len(s) - len(s.lstrip())
 
