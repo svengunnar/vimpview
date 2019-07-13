@@ -27,7 +27,7 @@ def get_files(pr_l, out):
         if common == proj_dir:
             regex = re.compile(pr[1])
             os.chdir(proj_dir)
-            get_files_rec(out, regex)
+            get_files_priv(out, regex)
             os.chdir(root_abs_path)
             return proj_dir
 
