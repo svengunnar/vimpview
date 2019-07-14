@@ -24,32 +24,6 @@ class BufWrapper:
     def empty(self):
         return self.first_append == True
 
-def n_lead_white_spaces(s):
-    return len(s) - len(s.lstrip())
-
-def get_cursor_abs_path():
-    # Find the absolute path of the file under the cursor
-    z = 0
-    row, _ = vim.current.window.cursor
-    f = vim.current.buffer[row - z - 1]
-    f_path = f.strip()
-    i = n_lead_white_spaces(f)
-    prev_i = i
-
-    while True:
-
-        if prev_i > i and "/" in f:
-            f_path = os.path.join(f.strip(), f_path)
-            prev_i = i
-
-        if i == 0:
-            break
-
-        f = vim.current.buffer[row - z - 1]
-        i = n_lead_white_spaces(f)
-        z += 1
-    return f_path
-
 def init():
     vim.command('''
         function! OpenProjectView()
@@ -80,16 +54,56 @@ def init():
     proj_view_cmd = vim.bindeval("g:vimpview_open_project_view").decode("utf-8")
     vim.command("nnoremap " + proj_view_cmd + " :call OpenProjectView()<CR>")
 
+def n_lead_white_spaces(s):
+    return len(s) - len(s.lstrip())
+
+def get_cursor_abs_path():
+    # Find the absolute path of the file under the cursor
+    z = 0
+    row, _ = vim.current.window.cursor
+    f = vim.current.buffer[row - 1]
+    f_path = f.strip()
+    i = n_lead_white_spaces(f)
+    prev_i = i
+
+    while True:
+
+        if prev_i > i and "/" in f:
+            f_path = os.path.join(f.strip(), f_path)
+            prev_i = i
+
+        if i == 0:
+            break
+
+        f = vim.current.buffer[row - z - 1]
+        i = n_lead_white_spaces(f)
+        z += 1
+    return f_path
+
 
 def cursor_moved():
     print(get_cursor_abs_path())
 
+def setup_current_buf():
+    # Create a new hidden buffer in the current window
+    vim.command("setlocal hidden")
+    vim.command("setlocal nomodifiable")
+    vim.command("setlocal nonumber")
+
+    # highlight current line
+    vim.command("setlocal cursorline")
+    vim.command("setlocal cursorline")
+    vim.command("hi CursorLine term=bold cterm=bold guibg=Grey40")
+    # Map current buffer <CR> to open file
+    vim.command("nnoremap <buffer> <CR> :call OpenFile()<CR>")
+    vim.command("autocmd CursorMoved <buffer> : call CursorMoved()")
+
 def open_project_view():
     if "g:vimpview_idx" in vim.vars:
-        vim.command("b " + str(vim.vars["g:vimpview_idx"]))
+        vim.current.buffer = vim.buffers[vim.vars["g:vimpview_idx"]]
+        return
     else:
         vim.command("ene")
-
         t = BufWrapper(vim.current.buffer)
 
         projects = vim.bindeval("g:vimpview_projects").decode("utf-8")
@@ -100,23 +114,9 @@ def open_project_view():
             return
 
         vim.vars["g:vimpview_root_path"] = root
-        # Create a new hidden buffer in the current window
-        vim.command("setlocal ro")
-        vim.command("setlocal hidden")
-        vim.command("setlocal nomodifiable")
-        vim.command("setlocal nonumber")
-
-        # highlight current line
-        vim.command("setlocal cursorline")
-        vim.command("setlocal cursorline")
-        vim.command("hi CursorLine term=bold cterm=bold guibg=Grey40")
-
-        # Map current buffer <CR> to open file
-        vim.command("nnoremap <buffer> <CR> :call OpenFile()<CR>")
-
         vim.vars["g:vimpview_idx"] = vim.current.buffer.number
-        vim.command("autocmd CursorMoved <buffer> : call CursorMoved()")
 
+        setup_current_buf()
 
 def open_file():
     # Don't open directories
@@ -132,11 +132,13 @@ def open_file():
     except vim.error:
         return
 
-def pre_quit():
-    # clear the text in the buffer to avoid error msg
-    if len(vim.windows) == 1:
-        if "g:vimpview_idx" in vim.vars:
-            idx = vim.vars["g:vimpview_idx"]
-            vim.command("bdelete! " + str(idx))
-            del vim.vars["g:vimpview_idx"]
+def clear(name):
+    if name in vim.vars:
+        idx = vim.vars[name]
+        vim.command("bdelete! " + str(idx))
+        del vim.vars[name]
 
+def pre_quit():
+    # clear the text in the buffers to avoid error msg
+    if len(vim.windows) == 1:
+        clear("g:vimpview_idx")
