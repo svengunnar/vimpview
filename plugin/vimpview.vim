@@ -56,7 +56,7 @@ function! PopulateBuf()
 	endfor
 endfunction
 
-function! OpenVimpView()
+function! OpenVimPView()
 	if exists("g:vimpview_bufnr")
 		execute "b " . g:vimpview_bufnr
 	else
@@ -89,7 +89,7 @@ function! CloseBuffer()
 	setlocal nomodifiable
 endfunction
 
-function! OpenVimbView()
+function! OpenVimBView()
 	if exists("g:vimbview_bufnr")
 		execute "b " . g:vimbview_bufnr
 		call PopulateBView()
@@ -113,10 +113,10 @@ endfunction
 
 autocmd QuitPre * : call PreQuit()
 if exists("g:vimpview_open_project_view")
-	execute "nnoremap" . g:vimpview_open_project_view . " : call OpenVimpView()<CR>"
+	execute "nnoremap" . g:vimpview_open_project_view . " : call OpenVimPView()<CR>"
 endif
 
 if exists("g:vimpview_open_buffers_view")
-	execute "nnoremap" . g:vimpview_open_buffers_view . " : call OpenVimbView()<CR>"
+	execute "nnoremap" . g:vimpview_open_buffers_view . " : call OpenVimBView()<CR>"
 endif
 
