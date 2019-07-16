@@ -1,16 +1,17 @@
-function! OpenFile()
-	 execute "e " . getline(".")
+function! OpenPFile()
+	execute "e ". fnamemodify(g:vimpview_cur_proj . "/" . getline(".") , ":.")
+endfunction
+
+function! OpenBFile()
+	execute "e " . getline(".")
 endfunction
 
 function! SetupCurrentBuf()
 	setlocal hidden
 	setlocal nomodifiable
 	setlocal nonumber
-	" highlight current line
 	setlocal cursorline
 	hi CursorLine term=bold cterm=bold guibg=Grey40
-	" Map current buffer <CR> to open file
-	execute "nnoremap  <buffer> <CR> :call OpenFile()<CR>"
 endfunction
 
 function! CommonPath(proj_dir_path, root_dir_path)
@@ -25,7 +26,7 @@ function! CommonPath(proj_dir_path, root_dir_path)
 	return 0
 endfunction
 
-function! PopulateBuf()
+function! PopulatePView()
 	let n = 1
 	let cur_proj = "."
 	let regex = ".*"
@@ -43,17 +44,21 @@ function! PopulateBuf()
 			endif
 		endfor
 	endif
-	let lines = split(globpath(cur_proj, "**"), "\n")
+	let lines = glob("`find " . cur_proj . " -type f -regex \"" . regex . "\"`", 0, 1)
 	let n = 1
 	let cur_proj_n = strlen(cur_proj)
-	echom regex
 	for line in lines
 		let rel_line = line[cur_proj_n + 1:]
-		if !empty(matchstr(rel_line, regex))
-			call setline(n, rel_line)
-			let n = n + 1
-		endif
+		call setline(n, rel_line)
+		let n = n + 1
 	endfor
+
+	let g:vimpview_cur_proj = fnamemodify(cur_proj, ":p:h")
+	echo g:vimpview_cur_proj
+endfunction
+
+function! CursorMoved()
+	echo g:vimpview_cur_proj
 endfunction
 
 function! OpenVimPView()
@@ -62,8 +67,10 @@ function! OpenVimPView()
 	else
 		execute "ene"
 		let g:vimpview_bufnr = bufnr("%")
-		call PopulateBuf()
+		call PopulatePView()
 		call SetupCurrentBuf()
+		autocmd CursorMoved <buffer> : call CursorMoved()
+		execute "nnoremap  <buffer> <CR> :call OpenPFile()<CR>"
 	endif
 endfunction
 
@@ -81,14 +88,6 @@ function! PopulateBView()
 	setlocal nomodifiable
 endfunction
 
-function! CloseBuffer()
-	setlocal modifiable
-	let path = getline(".")
-	execute "normal! dd"
-	execute "bdelete! " . bufnr(path)
-	setlocal nomodifiable
-endfunction
-
 function! OpenVimBView()
 	if exists("g:vimbview_bufnr")
 		execute "b " . g:vimbview_bufnr
@@ -99,8 +98,19 @@ function! OpenVimBView()
 		call PopulateBView()
 		call SetupCurrentBuf()
     		nnoremap <buffer> dd :call CloseBuffer()<CR>
+		execute "nnoremap  <buffer> <CR> :call OpenBFile()<CR>"
 	endif
 endfunction
+
+
+function! CloseBuffer()
+	setlocal modifiable
+	let path = getline(".")
+	execute "normal! dd"
+	execute "bdelete! " . bufnr(path)
+	setlocal nomodifiable
+endfunction
+
 
 function! PreQuit()
     if exists("g:vimpview_bufnr")
