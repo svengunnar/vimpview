@@ -11,6 +11,10 @@ function! SetupCurrentBuf()
 	setlocal nomodifiable
 	setlocal nonumber
 	setlocal cursorline
+	setlocal buftype=nofile
+	setlocal bufhidden=hide
+	setlocal noswapfile
+	setlocal nobuflisted
 	hi CursorLine term=bold cterm=bold guibg=Grey40
 endfunction
 
@@ -102,6 +106,25 @@ function! OpenVimBView()
 	endif
 endfunction
 
+function! OpenVimPList()
+	execute "ene"
+	call SetupCurrentBuf()
+	let l = g:vimpview_projects
+	let i = 1
+	setlocal modifiable
+	for p in l
+		let proj_dir_path = fnamemodify(p[0], ":p:h")
+		call setline(i, proj_dir_path)
+		let i = i + 1
+	endfor
+	setlocal nomodifiable
+	execute "nnoremap <buffer> <CR> : call ChangeProject()<CR>"
+endfunction
+
+function! ChangeProject()
+	execute "cd " . getline(".")
+	call PreQuit()
+endfunction
 
 function! CloseBuffer()
 	setlocal modifiable
@@ -111,26 +134,27 @@ function! CloseBuffer()
 	setlocal nomodifiable
 endfunction
 
-
 function! PreQuit()
-    if exists("g:vimpview_bufnr")
-	unlet g:vimpview_cur_proj
-	execute "bd! " . g:vimpview_bufnr
-	unlet g:vimpview_bufnr
-    endif
-    if exists("g:vimbview_bufnr")
-	execute "bd! " . g:vimbview_bufnr
-	unlet g:vimpbview_bufnr
-    endif
+	if exists("g:vimpview_bufnr")
+		unlet g:vimpview_bufnr
+	endif
+ 	if exists("g:vimpview_cur_proj")
+		unlet g:vimpview_cur_proj
+	endif
+	if exists("g:vimbview_bufnr")
+		unlet g:vimbview_bufnr
+	endif
 endfunction
 
 autocmd QuitPre * : call PreQuit()
 
 if exists("g:vimpview_open_project_view")
 	execute "nnoremap" . g:vimpview_open_project_view . " : call OpenVimPView()<CR>"
+	if exists("g:vimpview_open_project_list") && exists("g:vimpview_projects")
+		execute "nnoremap" . g:vimpview_open_project_list . " : call OpenVimPList()<CR>"
+	endif
 endif
 
 if exists("g:vimpview_open_buffers_view")
 	execute "nnoremap" . g:vimpview_open_buffers_view . " : call OpenVimBView()<CR>"
 endif
-
