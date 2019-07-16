@@ -1,5 +1,5 @@
 function! OpenPFile()
-	execute "e ". fnamemodify(g:vimpview_cur_proj . "/" . getline(".") , ":.")
+	execute "e ". fnamemodify(g:vimpview_cur_proj . "/" . getline(".") , ":~:.")
 endfunction
 
 function! OpenBFile()
@@ -54,11 +54,11 @@ function! PopulatePView()
 	endfor
 
 	let g:vimpview_cur_proj = fnamemodify(cur_proj, ":p:h")
-	echo g:vimpview_cur_proj
+	redraw | echo g:vimpview_cur_proj
 endfunction
 
 function! CursorMoved()
-	echo g:vimpview_cur_proj
+	redraw | echo g:vimpview_cur_proj
 endfunction
 
 function! OpenVimPView()
@@ -114,14 +114,18 @@ endfunction
 
 function! PreQuit()
     if exists("g:vimpview_bufnr")
+	unlet g:vimpview_cur_proj
 	execute "bd! " . g:vimpview_bufnr
+	unlet g:vimpview_bufnr
     endif
     if exists("g:vimbview_bufnr")
 	execute "bd! " . g:vimbview_bufnr
+	unlet g:vimpbview_bufnr
     endif
 endfunction
 
 autocmd QuitPre * : call PreQuit()
+
 if exists("g:vimpview_open_project_view")
 	execute "nnoremap" . g:vimpview_open_project_view . " : call OpenVimPView()<CR>"
 endif
