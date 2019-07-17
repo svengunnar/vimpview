@@ -48,7 +48,7 @@ function! PopulatePView()
 			endif
 		endfor
 	endif
-	let lines = glob("`find " . cur_proj . " -type f -regex \"" . regex . "\"`", 0, 1)
+	let lines = glob("`find " . cur_proj . " -type f -regextype egrep -regex \"" . regex . "\"`", 0, 1)
 	let n = 1
 	let cur_proj_n = strlen(cur_proj)
 	for line in lines
