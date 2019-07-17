@@ -1,12 +1,9 @@
 # vimpview
-vim plugin for browsing files.
+vim plugin for browsing files efficiently.
 
-Some or all of the following should be set:
+At least one of the following two should be set for this plugin to do anything at all:
 * `let g:vimpview_open_project_view="<Leader>o"` - open the current window for browsing files. Use `<CR>` to open buffer.
 * `let g:vimpview_open_buffers_view="<Leader>b"` - open the current window for browsing loaded buffers. Use <`CR`> to open buffer. Use `dd` to unload buffer.
 
-Optional variable to define project roots and regex. Example: 
-
-* `let g:vimpview_projects=[['~/.vim/pack/plugins/start/vimpview/','.*\.vim$']]`
-
-The default behavior is `[['.', '.*']]`
+* `let g:vimpview_projects=[['~/.vim/pack/plugins/start/vimpview/','.*\.vim$']]` - Optionally define project roots and regexes. The default behavior is `[['.', '.*']]`.
+* `let g:vimpview_open_project_list="<Leader>l"` - A view for selecting project, does a `cd` into selected project. Only useful if the previous point is set.
