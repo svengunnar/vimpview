@@ -25,19 +25,13 @@ function! JOB_run_cmd(cmd)
 		\ "close_cb": "JOB_close_handler"})
 	let g:JOB_name2job[name] = job
 	let g:JOB_job2name[JOB_get_job_id(job)] = name
-endfunction
-function! JOB_handler(channel, msg)
-	let id = JOB_get_job_id(ch_getjob(a:channel))
-	echom "ERR: " . g:JOB_job2name[id]
-	let name =  g:JOB_job2name[id]
+	echom "Starting job: " . name
 endfunction
 
-function! JOB_clear_buffer(key)
-	let job = g:JOB_name2job[a:key]
-	let id = JOB_get_job_id(job)
+function! JOB_handler(channel, msg)
+	let id = JOB_get_job_id(ch_getjob(a:channel))
+	echom "Job Error: " . g:JOB_job2name[id]
 	let name =  g:JOB_job2name[id]
-	" Will cause JOB_close_handler to trigger
-	call job_stop(job, "kill")
 endfunction
 
 function! JOB_close_handler(channel)
@@ -52,8 +46,9 @@ endfunction
 function! JOB_maybe_kill_job(name)
 	let name = fnamemodify(a:name, ":t")
 	if has_key(g:JOB_name2job, name)
-		echom "KILL IT (" . name . ") WITH FIRE!"
-		call JOB_clear_buffer(name)
+		echom "Killing job: " . name
+		let job = g:JOB_name2job[name]
+		call job_stop(job, "kill")
 	endif
 endfunction
 
