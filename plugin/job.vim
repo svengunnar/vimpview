@@ -31,7 +31,6 @@ endfunction
 function! JOB_handler(channel, msg)
 	let id = JOB_get_job_id(ch_getjob(a:channel))
 	echom "Job Error: " . g:JOB_job2name[id]
-	let name =  g:JOB_job2name[id]
 endfunction
 
 function! JOB_close_handler(channel)
