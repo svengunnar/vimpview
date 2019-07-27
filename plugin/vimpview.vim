@@ -1,3 +1,6 @@
+
+source <sfile>:h/job.vim
+
 function! OpenPFile()
 	execute "e ". fnamemodify(g:vimpview_cur_proj . "/" . getline(".") , ":~:.")
 endfunction
@@ -132,6 +135,8 @@ function! CloseBuffer()
 	execute "normal! dd"
 	execute "bdelete! " . bufnr(path)
 	setlocal nomodifiable
+	" If path is job, kill it.
+	call JOB_maybe_kill_job(path)
 endfunction
 
 function! PreQuit()
