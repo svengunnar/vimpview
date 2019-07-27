@@ -44,7 +44,7 @@ endfunction
 
 function! JOB_maybe_kill_job(name)
 	let name = fnamemodify(a:name, ":t")
-	if has_key(g:JOB_name2job, name)
+	if exists("g:JOB_name2job") && has_key(g:JOB_name2job, name)
 		echom "Killing job: " . name
 		let job = g:JOB_name2job[name]
 		call job_stop(job, "kill")
